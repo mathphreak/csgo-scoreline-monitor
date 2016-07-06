@@ -7,6 +7,9 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+before_install:
+  - curl https://sh.rustup.rs -sSf | sh -s -- -y
+  - which rustup
 before_deploy:
   - mkdir build
   - ~/rust/bin/rustup target add x86_64-pc-windows-gnu
