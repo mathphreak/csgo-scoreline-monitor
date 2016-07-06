@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CS:GO Scoreline Monitor</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <style type="text/css">
+      .navbar-text {
+        /* force this even on narrow viewports */
+        float: left;
+        margin-right: 15px;
+        margin-left: 15px;
+      }
+
+      #fail-icons {
+        font-size: 10px;
+      }
+
+      body > .container:not(#js-loading) {
+        display: none;
+      }
+
+      #ct-score {
+        color: #92C2EB;
+      }
+
+      #t-score {
+        color: #DFC062;
+      }
+
+      .starred:not(:last-child)::before {
+        content: "\2605";
+      }
+
+      .starred:last-child::after {
+        content: "\2605";
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">csgo-scoreline-monitor</a>
+          <p id="fail-icons" class="navbar-text">
+            <span id="server-down" class="fa-stack text-danger" title="Server is down">
+              <i class="fa fa-cloud fa-stack-2x"></i>
+              <i class="fa fa-ban fa-stack-1x fa-inverse"></i>
+            </span>
+            <span id="csgo-down" class="fa-stack text-warning" title="Game is not running">
+              <i class="fa fa-gamepad fa-stack-1x"></i>
+              <i class="fa fa-ban fa-stack-2x"></i>
+            </span>
+          </p>
+          <p id="game-status" class="navbar-text">
+            <span id="gamemode">???</span> on <span id="map">???</span>
+          </p>
+          <p id="settings-wrapper" class="navbar-text">
+            <a href="#settings" id="settings-link">
+              <i class="fa fa-gear"></i>
+            </a>
+          </p>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" id="js-loading">
+      <h1>
+        Loading...
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+      </h1>
+    </div>
+
+    <div class="container" id="in-game">
+      <div id="no-round" class="alert alert-success" role="alert">
+        <h2>Between rounds</h2>
+      </div>
+      <div id="eta-container" class="alert alert-danger" role="alert">
+        <h2>
+          Max time to end of round:
+          <strong id="eta">?:??</strong>
+        </h2>
+      </div>
+      <h3>The score is <span id="ct-score">??</span>-<span id="t-score">??</span></h3>
+    </div>
+
+    <div class="container" id="out-of-game">
+      <h1>You're not in game!</h1>
+      <h2>
+        <a id="launch-game" class="btn btn-primary btn-lg" href="steam://run/730">
+          Launch
+        </a>
+      </h2>
+
+      <div id="gsi-install-config">
+        <p>Expected version <span id="gsi-target">???</span></p>
+        <p>Found version <span id="gsi-installed">???</span></p>
+        <form method="post" action="/install-gsi">
+          <input class="btn btn-default" type="submit" value="Install/Update">
+        </form>
+      </div>
+    </div>
+
+    <div class="container" id="settings">
+      <h1>Settings</h1>
+      <form action="/update-prefs" method="POST">
+        <div class="form-group">
+          <label for="install-path">CS:GO installation directory</label>
+          <input type="text" class="form-control" id="install-path"
+                 placeholder="C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\csgo\cfg"
+                 name="csgo_cfg_path">
+        </div>
+        <input type="submit" class="btn btn-default" value="Save">
+      </form>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <script>
+      /* global $ */
+
+      var roundEnd = new Date()
+
+      function update () {
+        var etaMS = roundEnd.getTime() - Date.now()
+        var etaS = Math.round(etaMS / 1000)
+        var etaM = Math.floor(etaS / 60)
+        etaS = etaS % 60
+        $("#eta").text(etaM + ":" + (etaS < 10 ? "0" : "") + etaS)
+        $.getJSON('/data.json').done(function (data) {
+          // clearly the server is up
+          $('#server-down').hide()
+
+          // show some data
+          $('#gsi-installed').text(data.gsi.installed)
+          $('#gsi-target').text(data.gsi.target)
+          $('#gamemode').text(data.gamemode)
+          $('#map').text(data.map)
+          if (data.settings && $('#settings').is(':hidden')) {
+            $('#install-path').val(data.settings.csgo_cfg_path)
+          }
+
+          if (data.round_end) {
+            roundEnd = new Date(data.round_end * 1000)
+          }
+
+          if (data.scores) {
+            $("#ct-score").text(data.scores.CT)
+            $("#t-score").text(data.scores.T)
+          }
+
+          if (data.team) {
+            var isCT = data.team === "CT"
+            $("#ct-score").toggleClass("starred", isCT);
+            $("#t-score").toggleClass("starred", !isCT);
+          }
+
+          var roundLive = data.round_live
+          $("#eta-container").toggle(roundLive)
+          $("#no-round").toggle(!roundLive)
+
+          // hide some stuff
+          var settingsError = data.gsi.installed === 'ERROR'
+          var showInstallConfig = data.gsi.installed !== data.gsi.target
+          showInstallConfig = showInstallConfig && !settingsError
+          var showFail = !data.up
+          var inGame = data.up && data.in_game
+          $('#gsi-install-config').toggle(showInstallConfig)
+          $('#csgo-down').toggle(showFail)
+          $('#launch-game').toggle(showFail)
+          $('#fail-icons').toggle(showFail)
+          $('#out-of-game').toggle(!inGame)
+          $('#in-game').toggle(inGame)
+          $('#game-status').toggle(inGame)
+          // don't hide the settings if there is no error, just show them if there is
+          if (settingsError) {
+            $('#settings').show()
+          }
+
+          setTimeout(update, 100)
+        }).fail(function () {
+          $('#fail-icons').show()
+          $('#server-down').show()
+          $('#csgo-down').hide()
+          $('#out-of-game').show()
+          $('#in-game').hide()
+
+          setTimeout(update, 5000)
+        })
+      }
+
+      $(function () {
+        $('#js-loading').hide()
+        $('#settings-link').click(function (evt) {
+          $('#settings').show()
+          evt.preventDefault()
+        })
+        $('#settings form').submit(function (evt) {
+          var formdata = $('#settings form').serializeArray()
+          var data = {}
+          formdata.forEach(function (obj) {
+            data[obj.name] = obj.value
+          })
+          data = JSON.stringify(data)
+          $.ajax({
+            type: 'POST',
+            url: '/update-prefs',
+            data: data,
+            dataType: 'json',
+            contentType: 'application/json'
+          })
+          $('#settings').hide()
+          evt.preventDefault()
+        })
+        update()
+        setTimeout(update, 100)
+      })
+    </script>
+  </body>
+</html>

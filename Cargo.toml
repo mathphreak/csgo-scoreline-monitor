@@ -1,0 +1,12 @@
+[package]
+
+name = "csgo-scoreline-monitor"
+version = "0.0.1"
+authors = [ "Matt Horn <mathphreak@gmail.com>" ]
+
+[dependencies]
+
+nickel="0.8"
+rustc-serialize="0.3"
+time="0.1"
+crc="1.3"
