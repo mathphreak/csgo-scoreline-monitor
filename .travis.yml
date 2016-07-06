@@ -7,6 +7,7 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+before_script: "which rust"
 before_deploy:
   - mkdir build
   - rustup target add x86_64-pc-windows-gnu
@@ -31,4 +32,4 @@ deploy:
     tags: true
     rust: stable
 after-deploy:
-- ls target/x86_64-apple-darwin/
+  - ls target/x86_64-apple-darwin/
