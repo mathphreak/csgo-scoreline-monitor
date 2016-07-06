@@ -8,8 +8,8 @@ matrix:
   allow_failures:
     - rust: nightly
 before_install:
-  - curl https://sh.rustup.rs -sSf | sh -s -- --prefix=~/rust --spec=stable -y --disable-sudo
-  - which rustup
+  - curl https://sh.rustup.rs -sSf | sh -s -- --spec=stable -y --disable-sudo
+  - ~/.cargo/bin/rustup
 before_deploy:
   - mkdir build
   - ~/rust/bin/rustup target add x86_64-pc-windows-gnu
@@ -26,9 +26,9 @@ deploy:
   api_key:
     secure: 0p3qjIFiXXtqbka7pfKQN3c0t4ryciwc5aLTmpl2L791cgDRCNmuaxv87yDw/X4ErMgn06AnQhAAs7H6AbFp4lBykpNlLovhGmCDLTQoy+b02LEjMUBAeze0dXFr2ISUHj4hPj1PcxfDsm0f3WTRe5nu/yfbKZUWMBY9/btU3EfJfV4/MAP9lF/YLURcna/Xre+rbFqCLOqltFknak9C8HxBKS249ZtM6NNBuDPcSx9er/YncMQj8socCvSknsFWQ3NSahpHJjpvYWIsLgbE1laZ62O/tybVfCySkU3rx1oHSN2pessfXlhM9ZYglxEtCiE3qOgst2UPPpXv45/XKQrtiB2SvcNpgW0+RGIiAKP5suBzRCyQf4nBUpPXJg98UxbAGJh96ogxjUQQpmrlPWRYZCqnC5Kim5++Q2WszyHxOQOK7cx0FOo1Ulhdp0cDj5FXJFHAItc3EW1ydwhQyyloIfPr8B+Wm127p42FoVsgroRHkbvqYmpwMwDWJWM8gDLMVTH40JtBgwF9Z3tcljadgqy55HXZy/Q5V/8RnA9ODNrQn7nOsX++E3GMg2ZbG8ovXSM/j0n4DEIbiFd5YpuahIXNSlduZfijHahaIx/S+TjIkTXlKMWQWeBOp/WDHrgpFpwckgUIInF7Upv3HIFGEO8YdUxbbLfiFvJpaF4=
   file:
-  - build/csgo-scoreline-monitor-win.exe
-  - build/csgo-scoreline-monitor-osx
-  - build/csgo-scoreline-monitor-linux
+    - build/csgo-scoreline-monitor-win.exe
+    - build/csgo-scoreline-monitor-osx
+    - build/csgo-scoreline-monitor-linux
   on:
     repo: mathphreak/csgo-scoreline-monitor
     tags: true
