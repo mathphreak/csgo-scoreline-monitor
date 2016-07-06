@@ -9,17 +9,16 @@ matrix:
     - rust: nightly
 before_install:
   - curl https://sh.rustup.rs -sSf | sh -s -- -y
-  - ~/.cargo/bin/rustup
 before_deploy:
   - mkdir build
-  - ~/rust/bin/rustup target add x86_64-pc-windows-gnu
-  - ~/rust/bin/rustup target add x86_64-apple-darwin
-  - ~/rust/bin/rustup target add x86_64-unknown-linux-gnu
-  - ~/rust/bin/rustup run stable cargo build --release --target x86_64-pc-windows-gnu
+  - ~/.cargo/bin/rustup target add x86_64-pc-windows-gnu
+  - ~/.cargo/bin/rustup target add x86_64-apple-darwin
+  - ~/.cargo/bin/rustup target add x86_64-unknown-linux-gnu
+  - ~/.cargo/bin/rustup run stable cargo build --release --target x86_64-pc-windows-gnu
   - cp target/x86_64-pc-windows-gnu/release/csgo-scoreline-monitor.exe build/csgo-scoreline-monitor-win.exe
-  - ~/rust/bin/rustup run stable cargo build --release --target x86_64-apple-darwin
+  - ~/.cargo/bin/rustup run stable cargo build --release --target x86_64-apple-darwin
   - cp target/x86_64-apple-darwin/release/csgo-scoreline-monitor build/csgo-scoreline-monitor-osx
-  - ~/rust/bin/rustup run stable cargo build --release --target x86_64-unknown-linux-gnu
+  - ~/.cargo/bin/rustup run stable cargo build --release --target x86_64-unknown-linux-gnu
   - cp target/x86_64-unknown-linux-gnu/release/csgo-scoreline-monitor build/csgo-scoreline-monitor-linux
 deploy:
   provider: releases
