@@ -8,7 +8,7 @@ matrix:
   allow_failures:
     - rust: nightly
 before_install:
-  - curl https://sh.rustup.rs -sSf | sh -s -- -y
+  - curl https://sh.rustup.rs -sSf | sh -s -- --prefix=~/rust --spec=stable -y --disable-sudo
   - which rustup
 before_deploy:
   - mkdir build
