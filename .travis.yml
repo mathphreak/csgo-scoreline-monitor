@@ -7,7 +7,7 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
-before_script: "which rust"
+before_script: "which rustc"
 before_deploy:
   - mkdir build
   - rustup target add x86_64-pc-windows-gnu
